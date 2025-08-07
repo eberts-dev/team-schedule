@@ -151,16 +151,27 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
 	const getDaysInRange = () => {
 		const days = []
-		const current = new Date(startDate)
-		while (current <= endDate) {
+		let current = new Date(
+			startDate.getFullYear(),
+			startDate.getMonth(),
+			startDate.getDate()
+		)
+		const endDateOnly = new Date(
+			endDate.getFullYear(),
+			endDate.getMonth(),
+			endDate.getDate()
+		)
+
+		while (current <= endDateOnly) {
 			days.push(new Date(current))
-			current.setDate(current.getDate() + 1)
+			current = new Date(current.getTime() + 24 * 60 * 60 * 1000)
 		}
 		return days
 	}
 
 	const days = getDaysInRange()
 
+	// смены для каждого дня
 	const getShiftForDay = (schedule: EmployeeSchedule, day: Date) => {
 		const dayStr = format(day, 'yyyy-MM-dd')
 		const plannedShift = schedule.plannedShifts.find(
