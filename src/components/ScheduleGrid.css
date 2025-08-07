@@ -350,8 +350,8 @@
 
 	.modal-content {
 		margin: 10px;
-		max-width: calc(100vw - 20px);
-		max-height: calc(100vh - 40px);
+		max-width: calc(100vw - 40px);
+		/* max-height: calc(100vh - 70px); */
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
 	}
@@ -403,7 +403,6 @@
 	.modal-content {
 		margin: 5px;
 		max-width: calc(100vw - 10px);
-		max-height: calc(100vh - 20px);
 	}
 
 	.modal-overlay {
