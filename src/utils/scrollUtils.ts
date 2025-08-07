@@ -10,7 +10,7 @@ export const disableScroll = (): void => {
 	document.body.style.overflow = 'hidden'
 
 	// iOS Safari
-	document.body.style.webkitOverflowScrolling = 'touch'
+	document.body.style.setProperty('-webkit-overflow-scrolling', 'touch')
 	document.body.style.overscrollBehavior = 'contain'
 }
 
@@ -20,7 +20,7 @@ export const enableScroll = (): void => {
 	document.body.style.top = ''
 	document.body.style.width = ''
 	document.body.style.overflow = ''
-	document.body.style.webkitOverflowScrolling = ''
+	document.body.style.setProperty('-webkit-overflow-scrolling', '')
 	document.body.style.overscrollBehavior = ''
 
 	window.scrollTo(0, scrollPosition)
