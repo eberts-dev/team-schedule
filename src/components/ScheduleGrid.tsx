@@ -121,10 +121,8 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
 	useEffect(() => {
 		if (isModalOpen) {
-			// Блокируем скролл
 			disableScroll()
 
-			// Обработчик клавиши Escape
 			const handleEscape = (e: KeyboardEvent) => {
 				if (e.key === 'Escape') {
 					closeModal()
@@ -133,7 +131,7 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 
 			document.addEventListener('keydown', handleEscape)
 
-			// Функция для восстановления скролла и удаления обработчика
+			// Функция отчистки
 			return () => {
 				enableScroll()
 				document.removeEventListener('keydown', handleEscape)
