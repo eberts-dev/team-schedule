@@ -22,6 +22,11 @@ const DateFilter: React.FC<DateFilterProps> = ({
 }) => {
 	const [activeButton, setActiveButton] = useState<string | null>(null)
 
+	// функция для безопасного форматирования даты
+	const formatDateSafely = (date: Date): string => {
+		return isNaN(date.getTime()) ? '' : format(date, 'yyyy-MM-dd')
+	}
+
 	// Определяем активную кнопку на основе текущих дат
 	useEffect(() => {
 		const today = new Date()
@@ -62,6 +67,12 @@ const DateFilter: React.FC<DateFilterProps> = ({
 
 	const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newStartDate = new Date(e.target.value)
+
+		// Проверяем валидность даты
+		if (isNaN(newStartDate.getTime())) {
+			return
+		}
+
 		onStartDateChange(newStartDate)
 
 		// Автоматический переход на конец диапазона, если он превышает maxDays
@@ -75,6 +86,11 @@ const DateFilter: React.FC<DateFilterProps> = ({
 
 	const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newEndDate = new Date(e.target.value)
+
+		// Проверяем валидность даты
+		if (isNaN(newEndDate.getTime())) {
+			return
+		}
 
 		if (showMaxDaysLimit) {
 			const maxEndDate = addDays(startDate, maxDays - 1)
@@ -134,9 +150,9 @@ const DateFilter: React.FC<DateFilterProps> = ({
 					<input
 						type='date'
 						id='start-date'
-						value={format(startDate, 'yyyy-MM-dd')}
+						value={formatDateSafely(startDate)}
 						onChange={handleStartDateChange}
-						max={format(endDate, 'yyyy-MM-dd')}
+						max={formatDateSafely(endDate)}
 					/>
 				</div>
 
@@ -145,12 +161,12 @@ const DateFilter: React.FC<DateFilterProps> = ({
 					<input
 						type='date'
 						id='end-date'
-						value={format(endDate, 'yyyy-MM-dd')}
+						value={formatDateSafely(endDate)}
 						onChange={handleEndDateChange}
-						min={format(startDate, 'yyyy-MM-dd')}
+						min={formatDateSafely(startDate)}
 						max={
 							showMaxDaysLimit
-								? format(addDays(startDate, maxDays - 1), 'yyyy-MM-dd')
+								? formatDateSafely(addDays(startDate, maxDays - 1))
 								: undefined
 						}
 					/>
