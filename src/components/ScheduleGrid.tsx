@@ -1,12 +1,13 @@
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import type { EmployeeSchedule, ShiftInfo } from '../types/schedule'
 import {
 	analyzeShift,
 	formatDuration,
 	formatTime,
 } from '../utils/scheduleUtils'
+import { disableScroll, enableScroll } from '../utils/scrollUtils'
 import './ScheduleGrid.css'
 
 interface ScheduleGridProps {
@@ -41,8 +42,16 @@ const ShiftModal: React.FC<ShiftModalProps> = ({
 	const actualEndTime = actual ? formatTime(actual.endTime) : null
 
 	return (
-		<div className='modal-overlay' onClick={onClose}>
-			<div className='modal-content' onClick={(e) => e.stopPropagation()}>
+		<div
+			className='modal-overlay'
+			onClick={onClose}
+			onTouchMove={(e) => e.preventDefault()}
+		>
+			<div
+				className='modal-content'
+				onClick={(e) => e.stopPropagation()}
+				onTouchMove={(e) => e.stopPropagation()}
+			>
 				<div className='modal-header'>
 					<h3>Детали смены</h3>
 					<button className='modal-close' onClick={onClose}>
@@ -109,6 +118,28 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 }) => {
 	const [selectedShift, setSelectedShift] = useState<ShiftInfo | null>(null)
 	const [isModalOpen, setIsModalOpen] = useState(false)
+
+	useEffect(() => {
+		if (isModalOpen) {
+			// Блокируем скролл
+			disableScroll()
+
+			// Обработчик клавиши Escape
+			const handleEscape = (e: KeyboardEvent) => {
+				if (e.key === 'Escape') {
+					closeModal()
+				}
+			}
+
+			document.addEventListener('keydown', handleEscape)
+
+			// Функция для восстановления скролла и удаления обработчика
+			return () => {
+				enableScroll()
+				document.removeEventListener('keydown', handleEscape)
+			}
+		}
+	}, [isModalOpen])
 
 	const handleShiftClick = (shiftInfo: ShiftInfo) => {
 		setSelectedShift(shiftInfo)
