@@ -2,7 +2,7 @@
 
 Современное React TypeScript приложение для управления и визуализации графиков работы сотрудников с сравнением запланированных и фактических смен.
 
-Демо: [team-schedule-kappa.vercel.app](https://vercel.com/romans-projects-6d268406/team-schedule)
+Демо: [[team-schedule-kappa.vercel.app](https://vercel.com/romans-projects-6d268406/team-schedule)](https://team-schedule-kappa.vercel.app/)
 
 ## Возможности
 
