@@ -1,5 +1,5 @@
 import { addDays, format } from 'date-fns'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import './DateFilter.css'
 
 interface DateFilterProps {
@@ -22,12 +22,22 @@ const DateFilter: React.FC<DateFilterProps> = ({
 }) => {
 	const [activeButton, setActiveButton] = useState<string | null>(null)
 
-	// функция для безопасного форматирования даты
+	// для форматирования даты
 	const formatDateSafely = (date: Date): string => {
 		return isNaN(date.getTime()) ? '' : format(date, 'yyyy-MM-dd')
 	}
 
-	// Определяем активную кнопку на основе текущих дат
+	// для создания даты без времени (только день)
+	const createDateOnly = (date: Date): Date => {
+		return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+	}
+
+	// для сравнения дат (только день)
+	const isSameDate = useCallback((date1: Date, date2: Date): boolean => {
+		return createDateOnly(date1).getTime() === createDateOnly(date2).getTime()
+	}, [])
+
+	// Активная кнопка на основе дат
 	useEffect(() => {
 		const today = new Date()
 		const daysDifference =
@@ -35,47 +45,45 @@ const DateFilter: React.FC<DateFilterProps> = ({
 				(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
 			) + 1
 
-		// Проверка, соответствует ли текущий диапазон одной из кнопок быстрого выбора
-		// Сравниваем даты (только день)
-		const startDateOnly = new Date(
-			startDate.getFullYear(),
-			startDate.getMonth(),
-			startDate.getDate()
-		)
-		const todayOnly = new Date(
-			today.getFullYear(),
-			today.getMonth(),
-			today.getDate()
-		)
+		if (isSameDate(startDate, today)) {
+			// Проверяем даты окончания для каждой кнопки
+			const expectedEndDate = (() => {
+				switch (daysDifference) {
+					case 1:
+						return isSameDate(endDate, today) ? 'Сегодня' : null
+					case 4:
+						return isSameDate(endDate, addDays(today, 3)) ? '4 дня' : null
+					case 7:
+						return isSameDate(endDate, addDays(today, 6)) ? '1 неделя' : null
+					case 14:
+						return isSameDate(endDate, addDays(today, 13)) ? '2 недели' : null
+					default:
+						return null
+				}
+			})()
 
-		if (startDateOnly.getTime() === todayOnly.getTime()) {
-			if (daysDifference === 1) {
-				setActiveButton('Сегодня')
-			} else if (daysDifference === 4) {
-				setActiveButton('4 дня')
-			} else if (daysDifference === 7) {
-				setActiveButton('1 неделя')
-			} else if (daysDifference === 14) {
-				setActiveButton('2 недели')
-			} else {
-				setActiveButton(null)
-			}
+			setActiveButton(expectedEndDate)
 		} else {
 			setActiveButton(null)
 		}
-	}, [startDate, endDate])
+	}, [startDate, endDate, isSameDate])
 
 	const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newStartDate = new Date(e.target.value)
 
-		// Проверяем валидность даты
+		// валидность даты
 		if (isNaN(newStartDate.getTime())) {
 			return
 		}
 
 		onStartDateChange(newStartDate)
 
-		// Автоматический переход на конец диапазона, если он превышает maxDays
+		if (endDate <= newStartDate) {
+			onEndDateChange(addDays(newStartDate, 1))
+			return
+		}
+
+		// Автоматический переход на конец, если он превышает maxDays
 		if (showMaxDaysLimit) {
 			const maxEndDate = addDays(newStartDate, maxDays - 1)
 			if (endDate > maxEndDate) {
@@ -89,6 +97,13 @@ const DateFilter: React.FC<DateFilterProps> = ({
 
 		// Проверяем валидность даты
 		if (isNaN(newEndDate.getTime())) {
+			return
+		}
+
+		// Проверяем, что дата окончания не равна дате начала (кроме кнопки "Сегодня")
+		if (isSameDate(startDate, newEndDate) && activeButton !== 'Сегодня') {
+			// Если выбрана та же дата и это не кнопка "Сегодня", устанавливаем следующий день
+			onEndDateChange(addDays(startDate, 1))
 			return
 		}
 
@@ -112,9 +127,9 @@ const DateFilter: React.FC<DateFilterProps> = ({
 
 	const handleQuickDate = (days: number, label: string) => {
 		const today = new Date()
+
 		const newStartDate = today
-		// Для "Сегодня" (days = 0) показываем один день, для остальных - указанное количество дней
-		const newEndDate = days === 0 ? today : addDays(today, days)
+		const newEndDate = days === 0 ? new Date(today) : addDays(today, days)
 
 		if (showMaxDaysLimit && days >= maxDays) {
 			onStartDateChange(newStartDate)
@@ -163,7 +178,11 @@ const DateFilter: React.FC<DateFilterProps> = ({
 						id='end-date'
 						value={formatDateSafely(endDate)}
 						onChange={handleEndDateChange}
-						min={formatDateSafely(startDate)}
+						min={
+							activeButton === 'Сегодня'
+								? formatDateSafely(startDate)
+								: formatDateSafely(addDays(startDate, 1))
+						}
 						max={
 							showMaxDaysLimit
 								? formatDateSafely(addDays(startDate, maxDays - 1))
@@ -195,11 +214,13 @@ const DateFilter: React.FC<DateFilterProps> = ({
 				))}
 			</div>
 
-			{showMaxDaysLimit && daysDifference > maxDays && (
-				<div className='warning-message'>
-					⚠️ Диапазон дат превышает максимальное количество дней {maxDays}
-				</div>
-			)}
+			{showMaxDaysLimit &&
+				daysDifference > maxDays &&
+				activeButton !== 'Сегодня' && (
+					<div className='warning-message'>
+						⚠️ Диапазон дат превышает максимальное количество дней {maxDays}
+					</div>
+				)}
 		</div>
 	)
 }
