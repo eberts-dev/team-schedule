@@ -95,7 +95,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
 	const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newEndDate = new Date(e.target.value)
 
-		// Проверяем валидность даты
+		// валидность даты
 		if (isNaN(newEndDate.getTime())) {
 			return
 		}
@@ -143,6 +143,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
 		setActiveButton(label)
 	}
 
+	// дни между датами
 	const daysDifference =
 		Math.ceil(
 			(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
