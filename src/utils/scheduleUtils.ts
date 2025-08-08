@@ -12,7 +12,7 @@ export const processScheduleData = (
 ): EmployeeSchedule[] => {
 	const employeeMap = new Map<string, EmployeeSchedule>()
 
-	// Группируем плановые смены по сотрудникам
+	// Группируем плановые смены
 	planned.forEach((shift) => {
 		const key = `${shift.employee}-${shift.store}`
 		if (!employeeMap.has(key)) {
@@ -27,7 +27,7 @@ export const processScheduleData = (
 		employeeMap.get(key)!.plannedShifts.push(shift)
 	})
 
-	// Группируем фактические смены по сотрудникам (идет в вариант 2)
+	// Группируем фактические (идет в вариант 2)
 	if (isAdvancedMode) {
 		actual.forEach((shift) => {
 			const key = `${shift.employee}-${shift.store}`
@@ -82,7 +82,6 @@ export const filterByDateRange = (
 	startDate: Date,
 	endDate: Date
 ): EmployeeSchedule[] => {
-	// фильтрация по диапазону дат
 	// Нормализуем даты до начала
 	const normalizedStartDate = new Date(
 		startDate.getFullYear(),

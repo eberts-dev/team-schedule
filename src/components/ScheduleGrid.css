@@ -303,7 +303,6 @@
 	color: #fff3e0;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) and (min-width: 211px) {
 	.header-cell.employee-header,
 	.cell.employee-cell {
