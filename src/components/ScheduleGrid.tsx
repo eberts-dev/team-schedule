@@ -24,7 +24,7 @@ interface ShiftModalProps {
 }
 
 const ShiftModal: React.FC<ShiftModalProps> = ({
-	// модальное окно с информацией о смене
+	// модальное окно
 	shiftInfo,
 	isOpen,
 	onClose,
@@ -35,7 +35,7 @@ const ShiftModal: React.FC<ShiftModalProps> = ({
 		shiftInfo
 	const plannedDuration = analyzeShift(planned).duration
 
-	// Оптимизация: предварительное форматирование времени
+	// форматирование времени
 	const plannedStartTime = formatTime(planned.startTime)
 	const plannedEndTime = formatTime(planned.endTime)
 	const actualStartTime = actual ? formatTime(actual.startTime) : null

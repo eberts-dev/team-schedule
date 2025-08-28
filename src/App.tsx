@@ -4,7 +4,11 @@ import DateFilter from './components/DateFilter'
 import ScheduleGrid from './components/ScheduleGrid'
 import scheduleData from './data/scheduleData.json'
 import type { EmployeeSchedule, ScheduleData } from './types/schedule'
-import { filterByDateRange, processScheduleData } from './utils/scheduleUtils'
+import {
+	adjustDates,
+	filterByDateRange,
+	processScheduleData,
+} from './utils/scheduleUtils'
 
 function App() {
 	const [data] = useState<ScheduleData>(scheduleData)
@@ -15,11 +19,15 @@ function App() {
 	})
 	const [schedules, setSchedules] = useState<EmployeeSchedule[]>([])
 	const [isAdvancedMode, setIsAdvancedMode] = useState(false)
+	const [dataOffset, setDataOffset] = useState(1)
 
 	useEffect(() => {
+		const adjustedPlanned = adjustDates(data.planned, dataOffset)
+		const adjustedActual = adjustDates(data.actual, dataOffset)
+
 		const processedSchedules = processScheduleData(
-			data.planned,
-			data.actual,
+			adjustedPlanned,
+			adjustedActual,
 			isAdvancedMode
 		)
 		const filteredSchedules = filterByDateRange(
@@ -28,7 +36,7 @@ function App() {
 			endDate
 		)
 		setSchedules(filteredSchedules)
-	}, [data, startDate, endDate, isAdvancedMode])
+	}, [data, startDate, endDate, isAdvancedMode, dataOffset])
 
 	const handleStartDateChange = (date: Date) => {
 		setStartDate(date)
@@ -89,6 +97,8 @@ function App() {
 						onEndDateChange={handleEndDateChange}
 						maxDays={4}
 						showMaxDaysLimit={!isAdvancedMode}
+						dateOffset={dataOffset}
+						onDateOffsetChange={setDataOffset}
 					/>
 
 					<div className='schedule-section'>

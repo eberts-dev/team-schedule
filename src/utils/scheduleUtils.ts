@@ -1,4 +1,11 @@
-import { differenceInMinutes, isAfter, isBefore, parseISO } from 'date-fns'
+import {
+	addDays,
+	differenceInDays,
+	differenceInMinutes,
+	isAfter,
+	isBefore,
+	parseISO,
+} from 'date-fns'
 import type {
 	EmployeeSchedule,
 	ScheduleItem,
@@ -142,5 +149,31 @@ export const formatTime = (dateString: string): string => {
 		hour: '2-digit',
 		minute: '2-digit',
 		hour12: false,
+	})
+}
+
+export const adjustDates = (
+	shifts: ScheduleItem[],
+	targetOffset: number = 7
+): ScheduleItem[] => {
+	if (shifts.length === 0) return shifts
+
+	const baseDate = parseISO(shifts[0].startTime)
+	const today = new Date()
+	const targetDate = addDays(today, targetOffset)
+	const daysDiff = differenceInDays(targetDate, baseDate)
+
+	return shifts.map((shifts) => {
+		const originalStart = parseISO(shifts.startTime)
+		const originalEnd = parseISO(shifts.endTime)
+
+		const adjustedStart = addDays(originalStart, daysDiff)
+		const adjustedEnd = addDays(originalEnd, daysDiff)
+
+		return {
+			...shifts,
+			startTime: adjustedStart.toISOString(),
+			endTime: adjustedEnd.toISOString(),
+		}
 	})
 }

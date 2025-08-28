@@ -9,6 +9,8 @@ interface DateFilterProps {
 	onEndDateChange: (date: Date) => void
 	maxDays?: number
 	showMaxDaysLimit?: boolean
+	dateOffset: number
+	onDateOffsetChange: (offset: number) => void
 }
 
 const DateFilter: React.FC<DateFilterProps> = ({
@@ -22,17 +24,17 @@ const DateFilter: React.FC<DateFilterProps> = ({
 }) => {
 	const [activeButton, setActiveButton] = useState<string | null>(null)
 
-	// для форматирования даты
+	// форматирования даты
 	const formatDateSafely = (date: Date): string => {
 		return isNaN(date.getTime()) ? '' : format(date, 'yyyy-MM-dd')
 	}
 
-	// для создания даты без времени (только день)
+	// создания даты без времени (только день)
 	const createDateOnly = (date: Date): Date => {
 		return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 	}
 
-	// для сравнения дат (только день)
+	// сравнения дат (только день)
 	const isSameDate = useCallback((date1: Date, date2: Date): boolean => {
 		return createDateOnly(date1).getTime() === createDateOnly(date2).getTime()
 	}, [])
@@ -83,7 +85,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
 			return
 		}
 
-		// Автоматический переход на конец, если он превышает maxDays
+		// Автоматический переход на конец
 		if (showMaxDaysLimit) {
 			const maxEndDate = addDays(newStartDate, maxDays - 1)
 			if (endDate > maxEndDate) {
@@ -100,9 +102,8 @@ const DateFilter: React.FC<DateFilterProps> = ({
 			return
 		}
 
-		// Проверяем, что дата окончания не равна дате начала (кроме кнопки "Сегодня")
+		// дата окончания не равна дате начала
 		if (isSameDate(startDate, newEndDate) && activeButton !== 'Сегодня') {
-			// Если выбрана та же дата и это не кнопка "Сегодня", устанавливаем следующий день
 			onEndDateChange(addDays(startDate, 1))
 			return
 		}
@@ -139,7 +140,6 @@ const DateFilter: React.FC<DateFilterProps> = ({
 			onEndDateChange(newEndDate)
 		}
 
-		// Устанавливаем активную кнопку
 		setActiveButton(label)
 	}
 
